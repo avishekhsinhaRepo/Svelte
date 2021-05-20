@@ -1,11 +1,17 @@
-import App from './App.svelte';
-
-const app = new App({
-	target: document.getElementById("app"),
-	props: {
-		name: 'world',
-		age: 30
-	}
+import Input from './Input.svelte';
+import Output from './Output.svelte';
+const inputApp = new Input({
+	target: document.querySelector("#inputData")
+	
 });
 
-export default app;
+ 
+
+document.querySelectorAll(".outputData").forEach(element => {
+    if (!element.hasChildNodes()) {
+      new Output({
+        target: element
+      });
+    }
+  });
+

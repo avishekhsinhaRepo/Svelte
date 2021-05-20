@@ -4,9 +4,11 @@ import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import copy from 'rollup-plugin-copy';
+import del from 'rollup-plugin-delete';
 
 const production = !process.env.ROLLUP_WATCH;
-
+let finalPath = '';
 function serve() {
 	let server;
 
@@ -34,19 +36,36 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: '../js/client/bundle.js'
+		file: 'public/build/bundle.js'
 	},
 	plugins: [
 		svelte({
 			compilerOptions: {
 				// enable run-time checks when not in production
 				dev: !production
+								
 			}
 		}),
+		del({ targets: '../js/*' ,force:true}),
+		copy({
+			targets: [
+			  { 
+			  src: 'public/build/bundle.js', 
+			  dest: '../js',
+			  rename: (name, extension, fullPath) => finalPath =`${name}.revv_${Date.now()}.${extension}`
+			 },
+			 {
+				src: '../index.html',
+				dest: '../',
+				transform: (contents, filename) => contents.toString().replace('bundle.revv_[0-9]*.js', finalPath)
+			  }
+			]
+		}),
+		
 		// we'll extract any component CSS out into
 		// a separate file - better for performance
 		css({ output: 'bundle.css' }),
-
+		
 		// If you have external dependencies installed from
 		// npm, you'll most likely need these plugins. In
 		// some cases you'll need additional configuration -
